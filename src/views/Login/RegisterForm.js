@@ -14,7 +14,7 @@ export default class RegisterForm extends Component {
         verificationcode_button_disabled: true,
         verificationcode_button_loading: false,
         verificationcode_button_text: "获取验证码",
-
+        count_down_number: 60,
     }
     onFinish = (values) => {
         const responseData = {
@@ -43,9 +43,34 @@ export default class RegisterForm extends Component {
         GetVerificationCode(responseData).then(response => {
             console.log(response.data);
             console.log(responseData);
+            this.countDown();
         }).catch(error => {
             console.log(error);
+            this.setState({
+                verificationcode_button_disabled: false,
+                verificationcode_button_loading: false,
+                verificationcode_button_text: "重新获取",
+            })
         })
+    }
+
+    countDown = () => {
+        let timer = setInterval(() => {
+            this.setState({
+                verificationcode_button_text: `${this.state.count_down_number}S`,
+                count_down_number: this.state.count_down_number - 1,
+            }, console.log(this.state.count_down_number))
+            if (this.state.count_down_number < 0) {
+                clearInterval(timer);
+                this.setState({
+                    verificationcode_button_disabled: false,
+                    verificationcode_button_loading: false,
+                    verificationcode_button_text: "重新获取",
+                    count_down_number: 6,
+                })
+                return false;
+            }
+        }, 1000)
     }
 
     denglu = () => {
