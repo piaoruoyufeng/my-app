@@ -1,22 +1,69 @@
 import React, { Component } from 'react';
-import { Form, Input, Button, Row, Col } from 'antd';
+import { Form, Input, Button, Row, Col, message } from 'antd';
 import { UserOutlined, LockOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { Login } from '../../api/account.js';
+import { Login, GetVerificationCode } from '../../api/account.js';
+import { validate_email } from '../../utils/validate.js';
 import './index.scss';
 
 export default class LoginForm extends Component {
+    state = {
+        username: "",
+        password: "",
+        verificationcode: "",
+        verificationcode_button_disabled: true,
+        verificationcode_button_loading: false,
+        verificationcode_button_text: "获取验证码",
+    }
     onFinish = (values) => {
-        Login().then(response => {
+        const responseData = {
+            username: this.state.username,
+            password: this.state.password,
+            verificationcode: this.state.verificationcode
+        }
+        Login(responseData).then(response => {
             console.log(response.data);
             console.log(values);
+            console.log(responseData);
         }).catch(error => {
             console.log(error);
         })
-    };
+    }
+
+    getVerificationCode = () => {
+        if (!(this.state.username && this.state.password)) {
+            message.warning('用户名或密码不能为空', 1);
+            return false;
+        }
+        this.setState({ verificationcode_button_loading: true, verificationcode_button_text: "获取中" })
+        const responseData = {
+            username: this.state.username,
+        }
+        GetVerificationCode(responseData).then(response => {
+            console.log(response.data);
+            console.log(responseData);
+        }).catch(error => {
+            console.log(error);
+        })
+    }
+
     zhuCe = () => {
         this.props.changeForm();
     }
+
+    changeUsername = (event) => {
+        this.setState({ username: event.target.value });
+    }
+
+    changePassword = (event) => {
+        this.setState({ password: event.target.value });
+    }
+
+    changeVerificationCode = (event) => {
+        this.setState({ verificationcode: event.target.value });
+    }
+
     render() {
+        const _this = this;
         return (
             <div className='form-wrap'>
                 <div>
@@ -33,9 +80,21 @@ export default class LoginForm extends Component {
                         >
                             <Form.Item
                                 name="username"
-                                rules={[{ required: true, message: 'Please input your Username!' }, { type: 'email', message: 'Not a valid email!' }]}
+                                rules={[{ required: true, message: 'Please input your Username!' },
+                                // { type: 'email', message: 'Not a valid username!' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (getFieldValue('username') && validate_email(value)) {
+                                            _this.setState({ verificationcode_button_disabled: false });
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Not a valid username!'));
+                                    },
+                                }),]}
                             >
-                                <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Username" />
+                                <Input
+                                    prefix={<UserOutlined className="site-form-item-icon" />}
+                                    placeholder="Username" onChange={this.changeUsername} />
                             </Form.Item>
                             <Form.Item
                                 name="password"
@@ -45,6 +104,7 @@ export default class LoginForm extends Component {
                                     prefix={<LockOutlined className="site-form-item-icon" />}
                                     type="password"
                                     placeholder="Password"
+                                    onChange={this.changePassword}
                                 />
                             </Form.Item>
                             <Form.Item
@@ -54,18 +114,31 @@ export default class LoginForm extends Component {
                                     <Col span={15}>
                                         <Input
                                             prefix={<SafetyCertificateOutlined className="site-form-item-icon" />}
-                                            type="number"
+                                            type="password"
                                             placeholder="Verification Code"
-                                        /></Col>
+                                            onChange={this.changeVerificationCode}
+                                        />
+                                    </Col>
                                     <Col span={9}>
-                                        <Button type="danger" htmlType="button" className="login-form-button">
-                                            获取验证码
+                                        <Button
+                                            type="danger"
+                                            htmlType="button"
+                                            className="login-form-button"
+                                            onClick={this.getVerificationCode}
+                                            disabled={this.state.verificationcode_button_disabled}
+                                            loading={this.state.verificationcode_button_loading}
+                                            block>
+                                            {this.state.verificationcode_button_text}
                                         </Button>
                                     </Col>
                                 </Row>
                             </Form.Item>
                             <Form.Item>
-                                <Button type="primary" htmlType="submit" className="login-form-button" block>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    className="login-form-button"
+                                    block>
                                     登录
                                 </Button>
                             </Form.Item>

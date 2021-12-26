@@ -7,3 +7,11 @@ export function Login(data) {
         data,
     })
 }
+
+export function GetVerificationCode(data) {
+    return service.request({
+        url: "/api",
+        method: "get",
+        data,
+    })
+}
