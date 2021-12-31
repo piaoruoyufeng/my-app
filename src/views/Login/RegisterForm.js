@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Form, Input, Button, Row, Col, message } from 'antd';
-import { UserOutlined, LockOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { Form, Input, Button } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { validate_password, validate_email } from '../../utils/validate.js';
-import { Login, GetVerificationCode } from '../../api/account.js';
+import { Login } from '../../api/account.js';
 import './index.scss';
+import VerificationCode from '../../components/VerificationCode/index.js';
 
 export default class RegisterForm extends Component {
     state = {
@@ -11,11 +12,8 @@ export default class RegisterForm extends Component {
         password: "",
         passwordagain: "",
         verificationcode: "",
-        verificationcode_button_disabled: true,
-        verificationcode_button_loading: false,
-        verificationcode_button_text: "获取验证码",
-        count_down_number: 60,
     }
+
     onFinish = (values) => {
         const responseData = {
             username: this.state.username,
@@ -23,54 +21,12 @@ export default class RegisterForm extends Component {
             verificationcode: this.state.verificationcode
         }
         Login(responseData).then(response => {
-            console.log(response.data);
-            console.log(values);
-            console.log(responseData);
+            console.log('@response.data', response.data);
+            console.log('@value', values);
+            console.log('@responseData', responseData);
         }).catch(error => {
-            console.log(error);
+            console.log('@error', error);
         })
-    }
-
-    getVerificationCode = () => {
-        if (!(this.state.username && this.state.password)) {
-            message.warning('用户名或密码不能为空!', 1);
-            return false;
-        }
-        this.setState({ verificationcode_button_loading: true, verificationcode_button_text: "获取中" })
-        const responseData = {
-            username: this.state.username,
-        }
-        GetVerificationCode(responseData).then(response => {
-            console.log(response.data);
-            console.log(responseData);
-            this.countDown();
-        }).catch(error => {
-            console.log(error);
-            this.setState({
-                verificationcode_button_disabled: false,
-                verificationcode_button_loading: false,
-                verificationcode_button_text: "重新获取",
-            })
-        })
-    }
-
-    countDown = () => {
-        let timer = setInterval(() => {
-            this.setState({
-                verificationcode_button_text: `${this.state.count_down_number}S`,
-                count_down_number: this.state.count_down_number - 1,
-            }, console.log(this.state.count_down_number))
-            if (this.state.count_down_number < 0) {
-                clearInterval(timer);
-                this.setState({
-                    verificationcode_button_disabled: false,
-                    verificationcode_button_loading: false,
-                    verificationcode_button_text: "重新获取",
-                    count_down_number: 6,
-                })
-                return false;
-            }
-        }, 1000)
     }
 
     denglu = () => {
@@ -89,12 +45,7 @@ export default class RegisterForm extends Component {
         this.setState({ passwordagain: event.target.value });
     }
 
-    changeVerificationCode = (event) => {
-        this.setState({ verificationcode: event.target.value });
-    }
-
     render() {
-        const _this = this;
         return (
             <div className='form-wrap'>
                 <div>
@@ -111,43 +62,45 @@ export default class RegisterForm extends Component {
                         >
                             <Form.Item
                                 name="username"
-                                rules={[{ required: true, message: 'Please input your Username!' },
+                                rules={[{ required: true, message: '请输入用户名!' },
                                 ({ getFieldValue }) => ({
                                     validator(_, value) {
                                         if (getFieldValue('username') && validate_email(value)) {
-                                            _this.setState({ verificationcode_button_disabled: false });
                                             return Promise.resolve();
                                         }
-                                        return Promise.reject(new Error('Not a valid username!'));
+                                        return Promise.reject(new Error('用户名格式错误!'));
                                     },
                                 }),]}
                             >
                                 <Input
                                     prefix={<UserOutlined className="site-form-item-icon" />}
-                                    placeholder="Username" onChange={this.changeUsername} />
+                                    placeholder="请输入用户名!" onChange={this.changeUsername}
+                                    autoComplete="true"
+                                />
                             </Form.Item>
                             <Form.Item
                                 name="password"
-                                rules={[{ required: true, message: 'Please input your Password!' },
-                                { pattern: validate_password, message: 'Not a valid password!' }]}
+                                rules={[{ required: true, message: '请输入密码!' },
+                                { pattern: validate_password, message: '密码格式错误!' }]}
                             >
                                 <Input
                                     prefix={<LockOutlined className="site-form-item-icon" />}
                                     type="password"
-                                    placeholder="Password"
+                                    placeholder="请输入密码!"
                                     onChange={this.changePassword}
+                                    autoComplete="true"
                                 />
                             </Form.Item>
                             <Form.Item
                                 name="passwordagain"
-                                rules={[{ required: true, message: 'Please input your Password Again!' },
-                                { pattern: validate_password, message: 'Not a valid password!' },
+                                rules={[{ required: true, message: '请再次输入密码!' },
+                                { pattern: validate_password, message: '密码格式错误!' },
                                 ({ getFieldValue }) => ({
                                     validator(_, passwordagain) {
                                         if (!passwordagain || getFieldValue('password') === passwordagain) {
                                             return Promise.resolve();
                                         }
-                                        return Promise.reject(new Error('The two passwords that you entered do not match!'));
+                                        return Promise.reject(new Error('两次输入的密码不一致!'));
                                     },
                                 }),
                                 ]}
@@ -155,36 +108,12 @@ export default class RegisterForm extends Component {
                                 <Input
                                     prefix={<LockOutlined className="site-form-item-icon" />}
                                     type="password"
-                                    placeholder="Password Again"
+                                    placeholder="请再次输入密码!"
                                     onChange={this.changePasswordAgain}
+                                    autoComplete="true"
                                 />
                             </Form.Item>
-                            <Form.Item
-                                name="verification code"
-                                rules={[{ required: true, message: 'Please input Verification Code!' }]}>
-                                <Row gutter={13}>
-                                    <Col span={15}>
-                                        <Input
-                                            prefix={<SafetyCertificateOutlined className="site-form-item-icon" />}
-                                            type="password"
-                                            placeholder="Verification Code"
-                                            onChange={this.changeVerificationCode}
-                                        />
-                                    </Col>
-                                    <Col span={9}>
-                                        <Button
-                                            type="danger"
-                                            htmlType="button"
-                                            className="login-form-button"
-                                            onClick={this.getVerificationCode}
-                                            disabled={this.state.verificationcode_button_disabled}
-                                            loading={this.state.verificationcode_button_loading}
-                                            block>
-                                            {this.state.verificationcode_button_text}
-                                        </Button>
-                                    </Col>
-                                </Row>
-                            </Form.Item>
+                            <VerificationCode username={this.state.username} />
                             <Form.Item>
                                 <Button
                                     type="primary"
