@@ -8,6 +8,14 @@ export function Login(data) {
     })
 }
 
+export function Register(data) {
+    return service.request({
+        url: "/api",
+        method: "get",
+        data,
+    })
+}
+
 export function GetVerificationCode(data) {
     return service.request({
         url: "/api",

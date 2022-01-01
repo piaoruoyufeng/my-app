@@ -1,31 +1,46 @@
 import React, { Component } from 'react';
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Login } from '../../api/account.js';
-import { validate_email } from '../../utils/validate.js';
+import { validate_email, validate_password } from '../../utils/validate.js';
 import './index.scss';
 import VerificationCode from '../../components/VerificationCode/index.js';
+import CryptoJS from 'crypto-js';
 
 export default class LoginForm extends Component {
     state = {
         username: "",
         password: "",
         verificationcode: "",
+        loading: false,
     }
 
-    onFinish = (values) => {
+    onFinish = () => {
         const { username, password, verificationcode } = this.state;
         const responseData = {
             username,
-            password,
+            password: CryptoJS.MD5(CryptoJS.MD5(password).toString()).toString(),
             verificationcode,
         }
         Login(responseData).then(response => {
-            console.log('@response.data', response.data);
-            console.log('@value', values);
-            console.log('@responseData', responseData);
+
+            for (let i = 0; i < response.data.length; i++) {
+                if (responseData.username === response.data[i].username && responseData.password === response.data[i].password && responseData.verificationcode === response.data[i].verificationcode) {
+                    this.setState({ loading: true });
+                    message.success('登录成功!', 1);
+                    return;
+                }
+                else {
+                    this.setState({ loading: false });
+                    message.error('登录失败!');
+                    return;
+                }
+            }
         }).catch(error => {
             console.log('@error', error);
+            this.setState({ loading: false });
+            message.error('登录失败，请检查用户名或密码是否正确!');
+            return;
         })
     }
 
@@ -39,6 +54,10 @@ export default class LoginForm extends Component {
 
     changePassword = (event) => {
         this.setState({ password: event.target.value });
+    }
+
+    changeVerificationCode = (verificationcode) => {
+        this.setState({ verificationcode });
     }
 
     render() {
@@ -76,7 +95,9 @@ export default class LoginForm extends Component {
                             </Form.Item>
                             <Form.Item
                                 name="password"
-                                rules={[{ required: true, message: '请输入密码!' }]}
+                                rules={[{ required: true, message: '请输入密码!' },
+                                { pattern: validate_password, message: '密码格式错误!' },
+                                ]}
                             >
                                 <Input
                                     prefix={<LockOutlined className="site-form-item-icon" />}
@@ -86,12 +107,13 @@ export default class LoginForm extends Component {
                                     autoComplete="true"
                                 />
                             </Form.Item>
-                            <VerificationCode username={this.state.username} />
+                            <VerificationCode username={this.state.username} changeVerificationCode={this.changeVerificationCode} />
                             <Form.Item>
                                 <Button
                                     type="primary"
                                     htmlType="submit"
                                     className="login-form-button"
+                                    loading={this.state.loading}
                                     block>
                                     登录
                                 </Button>

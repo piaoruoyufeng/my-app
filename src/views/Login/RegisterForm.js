@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { validate_password, validate_email } from '../../utils/validate.js';
-import { Login } from '../../api/account.js';
+import { Register } from '../../api/account.js';
 import './index.scss';
 import VerificationCode from '../../components/VerificationCode/index.js';
+import CryptoJS from 'crypto-js';
 
 export default class RegisterForm extends Component {
     state = {
@@ -12,19 +13,35 @@ export default class RegisterForm extends Component {
         password: "",
         passwordagain: "",
         verificationcode: "",
+        loading: false,
     }
 
-    onFinish = (values) => {
+    onFinish = () => {
+        const { username, password, verificationcode } = this.state;
         const responseData = {
-            username: this.state.username,
-            password: this.state.password,
-            verificationcode: this.state.verificationcode
+            username,
+            password: CryptoJS.MD5(CryptoJS.MD5(password).toString()).toString(),
+            verificationcode,
         }
-        Login(responseData).then(response => {
-            console.log('@response.data', response.data);
-            console.log('@value', values);
-            console.log('@responseData', responseData);
+        Register(responseData).then(response => {
+
+            for (let i = 0; i < response.data.length; i++) {
+                if (responseData.username === response.data[i].username && responseData.password === response.data[i].password && responseData.verificationcode === response.data[i].verificationcode) {
+                    this.setState({ loading: true });
+                    message.success('注册成功，自动返回登录页面中......', 1);
+                    setTimeout(() => {
+                        this.denglu();
+                    }, 3000);
+                    return;
+                }
+                else {
+                    this.setState({ loading: false });
+                    message.error('注册失败!', 1);
+                    return;
+                }
+            }
         }).catch(error => {
+            this.setState({ loading: false });
             console.log('@error', error);
         })
     }
@@ -43,6 +60,10 @@ export default class RegisterForm extends Component {
 
     changePasswordAgain = (event) => {
         this.setState({ passwordagain: event.target.value });
+    }
+
+    changeVerificationCode = (verificationcode) => {
+        this.setState({ verificationcode });
     }
 
     render() {
@@ -81,7 +102,16 @@ export default class RegisterForm extends Component {
                             <Form.Item
                                 name="password"
                                 rules={[{ required: true, message: '请输入密码!' },
-                                { pattern: validate_password, message: '密码格式错误!' }]}
+                                { pattern: validate_password, message: '密码格式错误!' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, password) {
+                                        if (getFieldValue('passwordagain') && getFieldValue('passwordagain') !== password) {
+                                            return Promise.reject(new Error('两次输入的密码不一致!'));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                }),
+                                ]}
                             >
                                 <Input
                                     prefix={<LockOutlined className="site-form-item-icon" />}
@@ -97,10 +127,10 @@ export default class RegisterForm extends Component {
                                 { pattern: validate_password, message: '密码格式错误!' },
                                 ({ getFieldValue }) => ({
                                     validator(_, passwordagain) {
-                                        if (!passwordagain || getFieldValue('password') === passwordagain) {
-                                            return Promise.resolve();
+                                        if (getFieldValue('password') && getFieldValue('password') !== passwordagain) {
+                                            return Promise.reject(new Error('两次输入的密码不一致!'));
                                         }
-                                        return Promise.reject(new Error('两次输入的密码不一致!'));
+                                        return Promise.resolve();
                                     },
                                 }),
                                 ]}
@@ -113,12 +143,13 @@ export default class RegisterForm extends Component {
                                     autoComplete="true"
                                 />
                             </Form.Item>
-                            <VerificationCode username={this.state.username} />
+                            <VerificationCode username={this.state.username} changeVerificationCode={this.changeVerificationCode} />
                             <Form.Item>
                                 <Button
                                     type="primary"
                                     htmlType="submit"
                                     className="login-form-button"
+                                    loading={this.state.loading}
                                     block>
                                     注册
                                 </Button>
@@ -126,7 +157,7 @@ export default class RegisterForm extends Component {
                         </Form>
                     </div>
                 </div>
-            </div>
+            </div >
         )
     }
 }

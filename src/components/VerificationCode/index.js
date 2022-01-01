@@ -23,6 +23,10 @@ export default class VerificationCode extends Component {
         return null;
     }
 
+    changeVerificationCode = (event) => {
+        this.props.changeVerificationCode(event.target.value);
+    }
+
     componentWillUnmount() {
         clearInterval(this.timer);
     }
@@ -42,8 +46,11 @@ export default class VerificationCode extends Component {
             username,
         }
         GetVerificationCode(responseData).then(response => {
-            console.log('@response.data', response.data);
-            console.log('@responseData', responseData);
+            for (let i = 0; i < response.data.length; i++) {
+                if (responseData.username === response.data[i].username) {
+                    message.success(`获取验证码成功，验证码是:${response.data[i].verificationcode}`, 1);
+                }
+            }
             this.countDown();
         }).catch(error => {
             console.log(error);
@@ -78,7 +85,7 @@ export default class VerificationCode extends Component {
         return (
             <Form.Item
                 name="verification code"
-                rules={[{ required: true, message: '请输入验证码!' }]}>
+                rules={[{ required: true, message: '请输入六位验证码!', len: 6 }]}>
                 <Row gutter={13}>
                     <Col span={15}>
                         <Input
@@ -86,6 +93,7 @@ export default class VerificationCode extends Component {
                             type="password"
                             placeholder="请输入验证码!"
                             autoComplete="true"
+                            onChange={this.changeVerificationCode}
                         />
                     </Col>
                     <Col span={9}>
