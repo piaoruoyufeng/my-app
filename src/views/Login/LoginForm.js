@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Login } from '../../api/account.js';
@@ -7,7 +8,18 @@ import './index.scss';
 import VerificationCode from '../../components/VerificationCode/index.js';
 import CryptoJS from 'crypto-js';
 
-export default class LoginForm extends Component {
+function withRouter(Component) {
+    return (props) => (
+        <Component
+            {...props}
+            params={useParams()}
+            location={useLocation()}
+            navigate={useNavigate()}
+        />
+    );
+}
+
+class LoginForm extends Component {
     state = {
         username: "",
         password: "",
@@ -23,19 +35,20 @@ export default class LoginForm extends Component {
             verificationcode,
         }
         Login(responseData).then(response => {
-
-            for (let i = 0; i < response.data.length; i++) {
+            for (let i = 0; i < response.data.length;) {
                 if (responseData.username === response.data[i].username && responseData.password === response.data[i].password && responseData.verificationcode === response.data[i].verificationcode) {
                     this.setState({ loading: true });
                     message.success('登录成功!', 1);
+                    this.props.navigate('/home');
                     return;
                 }
                 else {
-                    this.setState({ loading: false });
-                    message.error('登录失败!');
-                    return;
+                    i++;
                 }
             }
+            this.setState({ loading: false });
+            message.error('登录失败!');
+            return;
         }).catch(error => {
             console.log('@error', error);
             this.setState({ loading: false });
@@ -125,3 +138,5 @@ export default class LoginForm extends Component {
         )
     }
 }
+
+export default withRouter(LoginForm);

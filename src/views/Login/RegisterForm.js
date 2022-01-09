@@ -24,8 +24,7 @@ export default class RegisterForm extends Component {
             verificationcode,
         }
         Register(responseData).then(response => {
-
-            for (let i = 0; i < response.data.length; i++) {
+            for (let i = 0; i < response.data.length;) {
                 if (responseData.username === response.data[i].username && responseData.password === response.data[i].password && responseData.verificationcode === response.data[i].verificationcode) {
                     this.setState({ loading: true });
                     message.success('注册成功，自动返回登录页面中......', 1);
@@ -35,11 +34,12 @@ export default class RegisterForm extends Component {
                     return;
                 }
                 else {
-                    this.setState({ loading: false });
-                    message.error('注册失败!', 1);
-                    return;
+                    i++;
                 }
             }
+            this.setState({ loading: false });
+            message.error('注册失败!', 1);
+            return;
         }).catch(error => {
             this.setState({ loading: false });
             console.log('@error', error);
