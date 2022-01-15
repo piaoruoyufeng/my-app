@@ -15,7 +15,7 @@ export default class Home extends Component {
                     <Sider width="250px"><MySider /></Sider>
                     <Content className='layout-main'>Content</Content>
                 </Layout>
-                <Footer>Footer</Footer>
+                <Footer className='layout-footer'>我爱学习网</Footer>
             </Layout>
         )
     }
