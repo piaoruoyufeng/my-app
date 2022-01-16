@@ -7,6 +7,7 @@ import { validate_email, validate_password } from '../../utils/validate.js';
 import './index.scss';
 import VerificationCode from '../../components/VerificationCode/index.js';
 import CryptoJS from 'crypto-js';
+import { setToken } from '../../utils/session';
 
 function withRouter(Component) {
     return (props) => (
@@ -39,6 +40,7 @@ class LoginForm extends Component {
                 if (responseData.username === response.data[i].username && responseData.password === response.data[i].password && responseData.verificationcode === response.data[i].verificationcode) {
                     this.setState({ loading: true });
                     message.success('登录成功!', 1);
+                    setToken(response.data[i].token);
                     this.props.navigate('/home');
                     return;
                 }

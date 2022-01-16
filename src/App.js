@@ -10,7 +10,7 @@ export default class App extends Component {
         <BrowserRouter>
           <Routes>
             <Route path='/login' element={<Login />} />
-            <Route path='/home' element={<PrivateRoute page='/home' isLogin={true} />} />
+            <Route path='/home' element={<PrivateRoute page='/home' />} />
             <Route path='*' element={<Navigate to='/login' />} />
           </Routes>
         </BrowserRouter>

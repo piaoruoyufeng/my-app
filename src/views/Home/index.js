@@ -3,11 +3,13 @@ import { Layout } from 'antd';
 import "./index.scss";
 import MySider from '../../components/MySider';
 import MyHeader from '../../components/MyHeader';
+import { removeToken } from '../../utils/session';
 
 const { Header, Footer, Sider, Content } = Layout;
 
 export default class Home extends Component {
     render() {
+        removeToken('超时失效');
         return (
             <Layout className='layout-wrap'>
                 <Header className='layout-header'><MyHeader /></Header>
