@@ -37,24 +37,34 @@ class LoginForm extends Component {
         }
         Login(responseData).then(response => {
             for (let i = 0; i < response.data.length;) {
-                if (responseData.username === response.data[i].username && responseData.password === response.data[i].password && responseData.verificationcode === response.data[i].verificationcode) {
-                    this.setState({ loading: true });
-                    message.success('登录成功!', 1);
-                    setToken(response.data[i].token);
-                    this.props.navigate('/home');
-                    return;
+                if (responseData.username !== response.data[i].username) {
+                    i++;
                 }
                 else {
-                    i++;
+                    if (responseData.password === response.data[i].password && responseData.verificationcode === response.data[i].verificationcode) {
+                        this.setState({ loading: true });
+                        message.success('登录成功!', 1);
+                        setToken(response.data[i].token);
+                        this.props.navigate('/home');
+                        return;
+                    }
+                    else {
+                        this.setState({ loading: false });
+                        message.error('密码错误，请重新输入!');
+                        return;
+                    }
                 }
             }
             this.setState({ loading: false });
-            message.error('登录失败!');
+            message.warn('该用户不存在，自动前往注册页面中......');
+            setTimeout(() => {
+                this.zhuCe();
+            }, 3000);
             return;
         }).catch(error => {
             console.log('@error', error);
             this.setState({ loading: false });
-            message.error('登录失败，请检查用户名或密码是否正确!');
+            message.error('登录失败!');
             return;
         })
     }

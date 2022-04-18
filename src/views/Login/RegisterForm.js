@@ -6,7 +6,6 @@ import { Register } from '../../api/account.js';
 import './index.scss';
 import VerificationCode from '../../components/VerificationCode/index.js';
 import CryptoJS from 'crypto-js';
-
 export default class RegisterForm extends Component {
     state = {
         username: "",
@@ -24,24 +23,30 @@ export default class RegisterForm extends Component {
             verificationcode,
         }
         Register(responseData).then(response => {
+            console.log(responseData)
+            console.log(response)
             for (let i = 0; i < response.data.length;) {
-                if (responseData.username === response.data[i].username && responseData.password === response.data[i].password && responseData.verificationcode === response.data[i].verificationcode) {
+                if (responseData.username !== response.data[i].username) {
+                    i++;
+                }
+                else {
                     this.setState({ loading: true });
-                    message.success('注册成功，自动返回登录页面中......', 1);
+                    message.warn('该用户已注册，自动返回登录页面中......', 1);
                     setTimeout(() => {
                         this.denglu();
                     }, 3000);
                     return;
                 }
-                else {
-                    i++;
-                }
             }
-            this.setState({ loading: false });
-            message.error('注册失败!', 1);
+            this.setState({ loading: true });
+            message.success('注册成功，自动返回登录页面中......', 1);
+            setTimeout(() => {
+                this.denglu();
+            }, 3000);
             return;
         }).catch(error => {
             this.setState({ loading: false });
+            message.error('注册失败!', 1);
             console.log('@error', error);
         })
     }
