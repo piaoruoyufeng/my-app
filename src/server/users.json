@@ -1,17 +1,14 @@
 [
     {
         "username": "123@qq.com",
-        "password": "130811dbd239c97bd9ce933de7349f20",
-        "verificationcode": "qwe123"
+        "password": "130811dbd239c97bd9ce933de7349f20"
     },
     {
         "username": "456@qq.com",
-        "password": "482e2fe44983b884d790520929dbce94",
-        "verificationcode": "asd456"
+        "password": "482e2fe44983b884d790520929dbce94"
     },
     {
         "username": "789@qq.com",
-        "password": "c3814e1f74c311885cee2fee780eb4b4",
-        "verificationcode": "zxc789"
+        "password": "c3814e1f74c311885cee2fee780eb4b4"
     }
 ]

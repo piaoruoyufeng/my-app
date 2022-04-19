@@ -14,5 +14,12 @@ module.exports = function (app) {
         pathRewrite: {
             "^/api2": "",
         }
+    })),
+    app.use(createProxyMiddleware("/api3", {
+        target: "http://localhost:5000/getVerificationcode",
+        changeOrigin: true,
+        pathRewrite: {
+            "^/api3": "",
+        }
     }))
 };

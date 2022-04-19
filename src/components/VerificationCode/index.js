@@ -46,11 +46,7 @@ export default class VerificationCode extends Component {
             username,
         }
         GetVerificationCode(responseData).then(response => {
-            for (let i = 0; i < response.data.length; i++) {
-                if (responseData.username === response.data[i].username) {
-                    message.success(`获取验证码成功，验证码是:${response.data[i].verificationcode}`, 1);
-                }
-            }
+            message.success(`获取验证码成功，验证码是:${response.data.verificationcode}`, 1);
             this.countDown();
         }).catch(error => {
             console.log(error);

@@ -18,7 +18,7 @@ export function Register(data) {
 
 export function GetVerificationCode(data) {
     return service.request({
-        url: "/api1",
+        url: "/api3",
         method: "get",
         data,
     })

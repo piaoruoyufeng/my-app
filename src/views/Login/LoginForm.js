@@ -39,9 +39,11 @@ class LoginForm extends Component {
             for (let i = 0; i < response.data.length;) {
                 if (responseData.username !== response.data[i].username) {
                     i++;
+                    console.log(response)
+                    console.log(i)
                 }
                 else {
-                    if (responseData.password === response.data[i].password && responseData.verificationcode === response.data[i].verificationcode) {
+                    if (responseData.password === response.data[i].password) {
                         this.setState({ loading: true });
                         message.success('登录成功!', 1);
                         setToken(response.data[i].token);

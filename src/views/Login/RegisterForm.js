@@ -23,8 +23,6 @@ export default class RegisterForm extends Component {
             verificationcode,
         }
         Register(responseData).then(response => {
-            console.log(responseData)
-            console.log(response)
             for (let i = 0; i < response.data.length;) {
                 if (responseData.username !== response.data[i].username) {
                     i++;
