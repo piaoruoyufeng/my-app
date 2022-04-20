@@ -16,11 +16,10 @@ export default class RegisterForm extends Component {
     }
 
     onFinish = () => {
-        const { username, password, verificationcode } = this.state;
+        const { username, password } = this.state;
         const responseData = {
             username,
             password: CryptoJS.MD5(CryptoJS.MD5(password).toString()).toString(),
-            verificationcode,
         }
         Register(responseData).then(response => {
             for (let i = 0; i < response.data.length;) {

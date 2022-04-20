@@ -16,9 +16,33 @@ app.get('/login', (request, response) => {
 })
 
 app.get('/register', (request, response) => {
-	let params = request.query
-	console.log(params)
-	response.send(params)
+	const params = request.query;
+	const fs = require('fs');
+	const path = require('path');
+	fs.readFile(path.join(__dirname, './users.json'), error => {
+		const users = require('./users.json');
+		response.send(users);
+		let new_users = [];
+		for (let i = 0; i < users.length; i++) {
+			new_users.push(users[i]);
+		}
+		let isExist = false;
+		for (let j = 0; j < users.length;) {
+			if (params.username !== users[j].username) {
+				j++;
+			} else {
+				isExist = true;
+				break;
+			}
+		}
+		if (!isExist) {
+			new_users.push(params);
+		}
+		if (error) { console.log(error) }
+		fs.writeFile(path.join(__dirname, './users.json'), JSON.stringify(new_users), error => {
+			if (error) { console.log(error) }
+		})
+	})
 })
 
 app.get('/getVerificationcode', (request, response) => {
