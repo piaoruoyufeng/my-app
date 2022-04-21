@@ -22,29 +22,24 @@ export default class RegisterForm extends Component {
             password: CryptoJS.MD5(CryptoJS.MD5(password).toString()).toString(),
         }
         Register(responseData).then(response => {
-            for (let i = 0; i < response.data.length;) {
-                if (responseData.username !== response.data[i].username) {
-                    i++;
-                }
-                else {
-                    this.setState({ loading: true });
-                    message.warn('该用户已注册，自动返回登录页面中......', 1);
-                    setTimeout(() => {
-                        this.denglu();
-                    }, 3000);
-                    return;
-                }
+            if (response.data === 3) {
+                this.setState({ loading: true });
+                message.warn('该用户已注册，自动返回登录页面中......', 1);
+                setTimeout(() => {
+                    this.denglu();
+                }, 3000);
             }
-            this.setState({ loading: true });
-            message.success('注册成功，自动返回登录页面中......', 1);
-            setTimeout(() => {
-                this.denglu();
-            }, 3000);
-            return;
+            else {
+                this.setState({ loading: true });
+                message.success('注册成功，自动返回登录页面中......', 1);
+                setTimeout(() => {
+                    this.denglu();
+                }, 3000);
+            }
         }).catch(error => {
+            console.log('@error', error);
             this.setState({ loading: false });
             message.error('注册失败!', 1);
-            console.log('@error', error);
         })
     }
 

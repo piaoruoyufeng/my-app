@@ -1,11 +1,11 @@
-const tokenSdmin = 'adminToken';
+const tokenAdmin = 'adminToken';
 
 export function setToken(value) {
-    sessionStorage.setItem(tokenSdmin, value)
+    sessionStorage.setItem(tokenAdmin, value)
 }
 
 export function getToken() {
-    return sessionStorage.getItem(tokenSdmin)
+    return sessionStorage.getItem(tokenAdmin)
 }
 
 export function removeToken(type) {

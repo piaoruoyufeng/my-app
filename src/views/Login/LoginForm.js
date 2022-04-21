@@ -29,45 +29,33 @@ class LoginForm extends Component {
     }
 
     onFinish = () => {
-        const { username, password, verificationcode } = this.state;
+        const { username, password } = this.state;
         const responseData = {
             username,
             password: CryptoJS.MD5(CryptoJS.MD5(password).toString()).toString(),
-            verificationcode,
         }
         Login(responseData).then(response => {
-            for (let i = 0; i < response.data.length;) {
-                if (responseData.username !== response.data[i].username) {
-                    i++;
-                    console.log(response)
-                    console.log(i)
-                }
-                else {
-                    if (responseData.password === response.data[i].password) {
-                        this.setState({ loading: true });
-                        message.success('登录成功!', 1);
-                        setToken(response.data[i].token);
-                        this.props.navigate('/home');
-                        return;
-                    }
-                    else {
-                        this.setState({ loading: false });
-                        message.error('密码错误，请重新输入!');
-                        return;
-                    }
-                }
+            if (response.data === 1) {
+                this.setState({ loading: true });
+                message.success('登录成功!', 1);
+                setToken(response.data);
+                this.props.navigate('/home');
             }
-            this.setState({ loading: false });
-            message.warn('该用户不存在，自动前往注册页面中......');
-            setTimeout(() => {
-                this.zhuCe();
-            }, 3000);
-            return;
+            else if (response.data === 2) {
+                this.setState({ loading: false });
+                message.error('密码错误，请重新输入!');
+            }
+            else {
+                this.setState({ loading: false });
+                message.warn('该用户不存在，自动前往注册页面中......');
+                setTimeout(() => {
+                    this.zhuCe();
+                }, 3000);
+            }
         }).catch(error => {
             console.log('@error', error);
             this.setState({ loading: false });
             message.error('登录失败!');
-            return;
         })
     }
 

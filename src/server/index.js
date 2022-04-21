@@ -11,8 +11,25 @@ app.use((request, response, next) => {
 })
 
 app.get('/login', (request, response) => {
+	const params = request.query;
 	const users = require('./users.json');
-	response.send(users)
+	let code;
+	for (let i = 0; i < users.length; i++) {
+		if (params.username === users[i].username) {
+			if (params.password === users[i].password) {
+				code = '1';
+				break;
+			}
+			else {
+				code = '2';
+				break;
+			}
+		}
+		else {
+			code = '3';
+		}
+	}
+	response.send(code);
 })
 
 app.get('/register', (request, response) => {
@@ -20,21 +37,21 @@ app.get('/register', (request, response) => {
 	const fs = require('fs');
 	const path = require('path');
 	const users = require('./users.json');
-	response.send(users);
-	let new_users = [];
+	let code;
 	for (let i = 0; i < users.length; i++) {
-		new_users.push(users[i]);
-	}
-	let isExist = false;
-	for (let j = 0; j < users.length;) {
-		if (params.username !== users[j].username) {
-			j++;
-		} else {
-			isExist = true;
+		if (params.username === users[i].username) {
+			code = '3';
 			break;
 		}
+		else {
+			code = '1';
+		}
 	}
-	if (!isExist) {
+	if (code === '1') {
+		let new_users = [];
+		for (let i = 0; i < users.length; i++) {
+			new_users.push(users[i]);
+		}
 		new_users.push(params);
 		fs.readFile(path.join(__dirname, './users.json'), error => {
 			if (error) { console.log(error) }
@@ -43,6 +60,7 @@ app.get('/register', (request, response) => {
 			})
 		})
 	}
+	response.send(code);
 })
 
 app.get('/getVerificationcode', (request, response) => {
