@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
-
+const bodyParser = require('body-parser')
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use((request, response, next) => {
@@ -66,6 +68,11 @@ app.get('/register', (request, response) => {
 app.get('/getVerificationcode', (request, response) => {
 	const verificationcode = { verificationcode: Math.random().toFixed(6).slice(-6) }
 	response.send(verificationcode)
+})
+
+app.post('/test', (request, response) => {
+	console.log(request.body)
+	response.send({ text: 'success' })
 })
 
 app.listen(5000, (err) => {
